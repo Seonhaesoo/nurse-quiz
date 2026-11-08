@@ -12,7 +12,7 @@
   const EXAM_MINUTES = 105; // 국시원 2026년도 기준: 105문항 · 105분
   const PASS_SUBJECT = 0.4;
   const PASS_TOTAL = 0.6;
-  const KEYS = { session: "nam.session", wrong: "nam.wrong", history: "nam.history", theme: "nam.theme", auth: "nam.auth", reveal: "nam.reveal" };
+  const KEYS = { session: "bk.session", wrong: "bk.wrong", history: "bk.history", theme: "bk.theme", auth: "bk.auth", reveal: "bk.reveal", round: "bk.round" };
   // 처음 들어올 때 보여 주는 환영용 로그인 (공개 사이트라 실제 보안 기능은 아님)
   const LOGIN_CODE = "김민지합격";
   const CIRCLED = ["①", "②", "③", "④", "⑤", "⑥"];
@@ -94,7 +94,7 @@
 
   function makeItems(ids) {
     return ids.map(function (id) {
-      return { id: id, order: shuffle(range(BY_ID[id].choices.length)) };
+      return { id: id, order: range(BY_ID[id].choices.length) }; // 문제집과 같은 보기 순서 유지
     });
   }
 
@@ -128,7 +128,14 @@
   }
 
   // ===== 모의고사 구성 =====
-  function examIds() {
+  const ROUNDS = Array.from(new Set(BANK.map(function (q) { return q.round; }))).sort(function (a, b) { return a - b; });
+  function roundIds(r) {
+    return BANK.filter(function (q) { return q.round === r; })
+      .sort(function (a, b) { return a.num - b.num; })
+      .map(function (q) { return q.id; });
+  }
+  function examIds(sel) {
+    if (sel && sel !== "mix") return roundIds(parseInt(sel, 10));
     let ids = [];
     SUBJECT_ORDER.forEach(function (s) {
       const pool = shuffle(BANK.filter(function (q) { return q.subject === s; }).map(function (q) { return q.id; }));
@@ -204,15 +211,28 @@
   });
 
   // ===== 홈 =====
+  function renderComposition() {
+    const sel = $("roundSelect").value;
+    const ids = examIds(sel === "mix" ? "mix" : sel);
+    $("examComposition").innerHTML = SUBJECT_ORDER.map(function (s) {
+      const n = ids.filter(function (id) { return BY_ID[id].subject === s; }).length;
+      return "<li><b>" + n + "문항</b>" + esc(SUBJECTS[s].name) + "</li>";
+    }).join("");
+  }
+
   function renderHome() {
     if (!authed) return showLogin();
     $("bankCount").textContent = BANK.length;
 
-    $("examComposition").innerHTML = SUBJECT_ORDER.map(function (s) {
-      const have = BANK.filter(function (q) { return q.subject === s; }).length;
-      const n = Math.min(have, SUBJECTS[s].count);
-      return "<li><b>" + n + "문항</b>" + esc(SUBJECTS[s].name) + "</li>";
-    }).join("");
+    const rs = $("roundSelect");
+    if (!rs.options.length) {
+      rs.innerHTML = ROUNDS.map(function (r) {
+        return '<option value="' + r + '">제' + r + "회 (" + roundIds(r).length + "문항)</option>";
+      }).join("") + '<option value="mix">회차 섞기 (과목별 무작위 105문항)</option>';
+      const saved = String(store.get(KEYS.round, ROUNDS[0] || "mix"));
+      if ([].some.call(rs.options, function (o) { return o.value === saved; })) rs.value = saved;
+    }
+    renderComposition();
 
     const sel = $("practiceSubject");
     if (!sel.options.length) {
@@ -298,6 +318,14 @@
     $("qNum").textContent = i + 1;
     $("qSubject").textContent = SUBJECTS[q.subject].name + (q.topic ? " · " + q.topic : "");
     $("qText").textContent = q.q;
+    const imgBox = $("qImg");
+    if (q.img) {
+      imgBox.innerHTML = '<img src="' + esc(q.img) + '" alt="문제 그림 (원본 스캔)">';
+      imgBox.classList.remove("hidden");
+    } else {
+      imgBox.innerHTML = "";
+      imgBox.classList.add("hidden");
+    }
 
     $("choices").innerHTML = it.order.map(function (orig, d) {
       let cls = "choice";
@@ -317,7 +345,7 @@
       const correctDisplay = it.order.indexOf(q.answer);
       fb.className = "feedback " + (ok ? "good" : "bad");
       fb.innerHTML = '<div class="verdict">' + (ok ? "정답이에요!" : "틀렸어요 · 정답 " + CIRCLED[correctDisplay]) + "</div>" +
-        "<div>" + esc(expText(q)) + "</div>";
+        (expText(q) ? "<div>" + esc(expText(q)) + "</div>" : "");
     } else {
       fb.className = "feedback hidden";
       fb.innerHTML = "";
@@ -497,8 +525,10 @@
       return '<div class="review-item"><div class="r-head"><span class="mark ' + (ok ? "o" : "x") + '">' + (ok ? "O" : "X") + "</span>" +
         "<span>" + (i + 1) + "번 · " + esc(SUBJECTS[q.subject].name) + (q.topic ? " · " + esc(q.topic) : "") + "</span>" +
         (chosen === undefined ? "<span>· 안 푼 문항</span>" : "") + "</div>" +
-        '<div class="r-q">' + esc(q.q) + "</div><ol>" + opts + "</ol>" +
-        '<div class="r-exp">' + esc(expText(q)) + "</div></div>";
+        '<div class="r-q">' + esc(q.q) + "</div>" +
+        (q.img ? '<div class="q-img"><img src="' + esc(q.img) + '" alt="문제 그림" loading="lazy"></div>' : "") +
+        "<ol>" + opts + "</ol>" +
+        (expText(q) ? '<div class="r-exp">' + esc(expText(q)) + "</div>" : "") + "</div>";
     }).join("");
   }
 
@@ -512,7 +542,14 @@
 
   $("startExamBtn").addEventListener("click", async function () {
     if (store.get(KEYS.session, null) && !(await confirmBox("풀던 시험이 사라져요. 새로 시작할까요?", "새로 시작"))) return;
-    startSession({ mode: "exam", title: "실전 모의고사", ids: examIds(), reveal: $("revealToggle").checked });
+    const sel = $("roundSelect").value;
+    const title = sel === "mix" ? "회차 섞기 모의고사" : "제" + sel + "회 모의고사";
+    startSession({ mode: "exam", title: title, ids: examIds(sel), reveal: $("revealToggle").checked });
+  });
+
+  $("roundSelect").addEventListener("change", function () {
+    store.set(KEYS.round, this.value);
+    renderComposition();
   });
 
   $("revealToggle").checked = store.get(KEYS.reveal, true) !== false;

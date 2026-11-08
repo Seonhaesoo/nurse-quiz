@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="apple-mobile-web-app-title" content="민지 모의고사">
-  <title>민지 합격기원 모의고사</title>
+  <title>민지 모의고사 (개인용)</title>
   <meta name="description" content="간호조무사 국가시험 대비 모의고사·과목별 연습·오답노트">
   <meta name="theme-color" content="#0f766e">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f766e'/><path d='M42 22h16v20h20v16H58v20H42V58H22V42h20z' fill='white'/></svg>">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="topbar">
@@ -53,7 +53,11 @@
 
       <div class="card hero">
         <h1>실전 모의고사</h1>
-        <p class="muted">실제 시험처럼 4과목 105문항 · 5지선다 · 105분 (국시원 2026년도 기준). 문제와 보기 순서가 매번 섞여요.</p>
+        <p class="muted">문제집의 회차를 그대로 풀어요. 4과목 105문항 · 5지선다 · 105분.</p>
+        <label class="field">
+          <span>회차</span>
+          <select id="roundSelect"></select>
+        </label>
         <ul class="subject-list" id="examComposition"></ul>
         <p class="pass-rule">합격 기준: 과목별 40% 이상 <b>그리고</b> 전체 60% 이상</p>
         <label class="check">
@@ -66,7 +70,7 @@
       <div class="grid2">
         <div class="card">
           <h2>과목별 연습</h2>
-          <p class="muted">한 문제 풀 때마다 바로 정답과 해설을 볼 수 있어요.</p>
+          <p class="muted">21회 전체에서 과목별로 섞어서 풀어요. 한 문제 풀 때마다 바로 정답과 해설을 볼 수 있어요.</p>
           <label class="field">
             <span>과목</span>
             <select id="practiceSubject"></select>
@@ -102,7 +106,7 @@
       </div>
 
       <p class="footnote muted">
-        문제은행 <b id="bankCount">0</b>문항 · 직접 만든 연습용 문제로, 실제 기출문제가 아니에요.
+        문제 <b id="bankCount">0</b>문항 · 개인 학습용(은하출판사 모의고사 문제집 옮김). 인터넷에 올리지 마세요.
         기록은 이 브라우저에만 저장돼요.
       </p>
     </section>
@@ -122,6 +126,7 @@
 
       <article class="card question">
         <p class="q-text" id="qText"></p>
+        <div class="q-img hidden" id="qImg"></div>
         <ol class="choices" id="choices"></ol>
         <div class="feedback hidden" id="feedback"></div>
       </article>
@@ -173,12 +178,7 @@
   </dialog>
 
   <!-- 문제 파일: 새 파일을 추가하면 여기에 한 줄 추가하세요 -->
-  <script src="data/q-basic.js?v=2"></script>
-  <script src="data/q-health.js?v=2"></script>
-  <script src="data/q-public.js?v=2"></script>
-  <script src="data/q-practice.js?v=2"></script>
-  <script src="data/q-extra-2026.js?v=2"></script>
-  <script src="data/q-frequent.js?v=2"></script>
-  <script src="app.js?v=2"></script>
+  <script src="data/book.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

@@ -320,3 +320,7 @@ dialog p { margin: 0 0 16px; white-space: pre-line; }
 .check { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 12px; font-size: .95rem; cursor: pointer; }
 .check input { width: 20px; height: 20px; margin: 2px 0 0; flex: none; accent-color: var(--accent); cursor: pointer; }
 .check small { color: var(--muted); }
+
+/* 원본 스캔 그림 */
+.q-img { margin: 0 0 14px; }
+.q-img img { display: block; max-width: 100%; height: auto; border-radius: 10px; border: 1px solid var(--border); background: #fff; }

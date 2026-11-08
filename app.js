@@ -12,7 +12,7 @@
   const EXAM_MINUTES = 105; // 국시원 2026년도 기준: 105문항 · 105분
   const PASS_SUBJECT = 0.4;
   const PASS_TOTAL = 0.6;
-  const KEYS = { session: "nam.session", wrong: "nam.wrong", history: "nam.history", theme: "nam.theme", auth: "nam.auth" };
+  const KEYS = { session: "nam.session", wrong: "nam.wrong", history: "nam.history", theme: "nam.theme", auth: "nam.auth", reveal: "nam.reveal" };
   // 처음 들어올 때 보여 주는 환영용 로그인 (공개 사이트라 실제 보안 기능은 아님)
   const LOGIN_CODE = "김민지합격";
   const CIRCLED = ["①", "②", "③", "④", "⑤", "⑥"];
@@ -109,6 +109,7 @@
       current: 0,
       startedAt: Date.now(),
       endsAt: opts.mode === "exam" ? Date.now() + EXAM_MINUTES * 60 * 1000 : null,
+      reveal: !!opts.reveal,        // 모의고사에서도 고르는 즉시 정답·해설 보기
     };
     saveSession();
     openQuiz();
@@ -117,7 +118,7 @@
   function saveSession() { if (session) store.set(KEYS.session, session); }
   function clearSession() { session = null; store.del(KEYS.session); stopTimer(); }
 
-  function isInstant() { return session.mode !== "exam"; }
+  function isInstant() { return session.mode !== "exam" || session.reveal === true; }
 
   function isCorrect(idx) {
     const it = session.items[idx];
@@ -255,7 +256,7 @@
   function openQuiz() {
     $("quizTitle").textContent = session.title;
     $("qTotal").textContent = session.items.length;
-    $("submitBtn").textContent = isInstant() ? "결과 보기" : "제출하고 채점하기";
+    $("submitBtn").textContent = session.mode === "exam" ? "제출하고 채점하기" : "결과 보기";
     $("navGrid").classList.add("hidden");
     $("toggleNavBtn").setAttribute("aria-expanded", "false");
     buildNav();
@@ -402,7 +403,7 @@
       const q = BY_ID[it.id];
       per[q.subject].n++;
       if (isCorrect(i)) { per[q.subject].c++; correct++; }
-      if (s.mode === "exam") recordAnswer(i);
+      if (s.mode === "exam" && !(s.reveal && answered)) recordAnswer(i); // 즉시 보기 모드에서 푼 문항은 이미 기록됨
     });
 
     const total = counted.length;
@@ -511,8 +512,11 @@
 
   $("startExamBtn").addEventListener("click", async function () {
     if (store.get(KEYS.session, null) && !(await confirmBox("풀던 시험이 사라져요. 새로 시작할까요?", "새로 시작"))) return;
-    startSession({ mode: "exam", title: "실전 모의고사", ids: examIds() });
+    startSession({ mode: "exam", title: "실전 모의고사", ids: examIds(), reveal: $("revealToggle").checked });
   });
+
+  $("revealToggle").checked = store.get(KEYS.reveal, true) !== false;
+  $("revealToggle").addEventListener("change", function () { store.set(KEYS.reveal, this.checked); });
 
   $("startPracticeBtn").addEventListener("click", async function () {
     const subj = $("practiceSubject").value;

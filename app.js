@@ -14,7 +14,7 @@
   const PASS_TOTAL = 0.6;
   const KEYS = { session: "nam.session", wrong: "nam.wrong", history: "nam.history", theme: "nam.theme", auth: "nam.auth" };
   // 처음 들어올 때 보여 주는 환영용 로그인 (공개 사이트라 실제 보안 기능은 아님)
-  const LOGIN = { id: "김민지", pw: "합격" };
+  const LOGIN_CODE = "김민지합격";
   const CIRCLED = ["①", "②", "③", "④", "⑤", "⑥"];
 
   // ===== 문제은행 =====
@@ -159,26 +159,46 @@
   // ===== 로그인 =====
   let authed = store.get(KEYS.auth, false) === true;
 
+  // 한글을 두벌식 자판의 영문 키로 바꾼다 (예: "합격" → "gkqrur").
+  // 한/영 전환을 깜빡하고 영문 상태로 쳐도 들어갈 수 있게 한다.
+  const CHO = ["r","R","s","e","E","f","a","q","Q","t","T","d","w","W","c","z","x","v","g"];
+  const JUNG = ["k","o","i","O","j","p","u","P","h","hk","ho","hl","y","n","nj","np","nl","b","m","ml","l"];
+  const JONG = ["","r","R","rt","s","sw","sg","e","f","fr","fa","fq","ft","fx","fv","fg","a","q","qt","t","T","d","w","c","z","x","v","g"];
+  function hangulToKeys(str) {
+    let out = "";
+    for (const ch of str) {
+      const code = ch.charCodeAt(0) - 0xAC00;
+      if (code >= 0 && code < 11172) {
+        out += CHO[Math.floor(code / 588)] + JUNG[Math.floor((code % 588) / 28)] + JONG[code % 28];
+      } else {
+        out += ch;
+      }
+    }
+    return out;
+  }
+  function matches(input, expected) {
+    const v = input.normalize("NFC").replace(/\s+/g, "");
+    const keys = hangulToKeys(expected);
+    return v === expected || v === keys || v.toLowerCase() === keys.toLowerCase();
+  }
+
   function showLogin() {
     stopTimer();
     $("loginError").classList.add("hidden");
     show("login");
-    setTimeout(function () { $("loginId").focus(); }, 0);
+    setTimeout(function () { $("loginCode").focus(); }, 0);
   }
 
   $("loginForm").addEventListener("submit", function (e) {
     e.preventDefault();
-    const id = $("loginId").value.trim();
-    const pw = $("loginPw").value.trim();
-    if (id === LOGIN.id && pw === LOGIN.pw) {
+    if (matches($("loginCode").value, LOGIN_CODE)) {
       authed = true;
       store.set(KEYS.auth, true);
-      $("loginPw").value = "";
+      $("loginCode").value = "";
       renderHome();
     } else {
       $("loginError").classList.remove("hidden");
-      $("loginPw").value = "";
-      $("loginPw").focus();
+      $("loginCode").select();
     }
   });
 

@@ -6,10 +6,10 @@
     basic:    { name: "기초간호학 개요", count: 35 },
     health:   { name: "보건간호학 개요", count: 15 },
     public:   { name: "공중보건학 개론", count: 20 },
-    practice: { name: "실기",            count: 30 },
+    practice: { name: "실기",            count: 35 },
   };
   const SUBJECT_ORDER = ["basic", "health", "public", "practice"];
-  const EXAM_MINUTES = 100;
+  const EXAM_MINUTES = 105; // 국시원 2026년도 기준: 105문항 · 105분
   const PASS_SUBJECT = 0.4;
   const PASS_TOTAL = 0.6;
   const KEYS = { session: "nam.session", wrong: "nam.wrong", history: "nam.history", theme: "nam.theme" };

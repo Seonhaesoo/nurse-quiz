@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-title" content="간조 모의고사">
-  <title>간호조무사 모의고사</title>
+  <meta name="apple-mobile-web-app-title" content="민지 모의고사">
+  <title>민지 합격기원 모의고사</title>
   <meta name="description" content="간호조무사 국가시험 대비 모의고사·과목별 연습·오답노트">
   <meta name="theme-color" content="#0f766e">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f766e'/><path d='M42 22h16v20h20v16H58v20H42V58H22V42h20z' fill='white'/></svg>">
@@ -14,7 +14,7 @@
   <header class="topbar">
     <button class="brand" id="homeBtn" type="button" aria-label="처음 화면으로">
       <span class="brand-mark" aria-hidden="true">+</span>
-      <span>간호조무사 모의고사</span>
+      <span>민지 합격기원 모의고사</span>
     </button>
     <div class="topbar-right">
       <span class="timer hidden" id="timer" aria-live="off"></span>
@@ -23,6 +23,25 @@
   </header>
 
   <main id="app">
+    <!-- 로그인 -->
+    <section id="view-login" class="view hidden">
+      <form class="card login-card" id="loginForm" autocomplete="off" novalidate>
+        <div class="login-mark" aria-hidden="true">+</div>
+        <h1>민지 합격기원 모의고사</h1>
+        <p class="muted">간호조무사 국가시험 <span style="white-space:nowrap">합격을 응원해요! 💪</span></p>
+        <label class="field">
+          <span>아이디</span>
+          <input type="text" id="loginId" autocomplete="username" required>
+        </label>
+        <label class="field">
+          <span>비밀번호</span>
+          <input type="password" id="loginPw" autocomplete="current-password" required>
+        </label>
+        <p class="login-error hidden" id="loginError" role="alert">아이디 또는 비밀번호가 맞지 않아요.</p>
+        <button class="btn primary big" type="submit">로그인</button>
+      </form>
+    </section>
+
     <!-- 홈 -->
     <section id="view-home" class="view">
       <div class="resume hidden" id="resumeBox">
@@ -159,6 +178,7 @@
   <script src="data/q-public.js"></script>
   <script src="data/q-practice.js"></script>
   <script src="data/q-extra-2026.js"></script>
+  <script src="data/q-frequent.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

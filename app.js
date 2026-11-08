@@ -12,7 +12,9 @@
   const EXAM_MINUTES = 105; // 국시원 2026년도 기준: 105문항 · 105분
   const PASS_SUBJECT = 0.4;
   const PASS_TOTAL = 0.6;
-  const KEYS = { session: "nam.session", wrong: "nam.wrong", history: "nam.history", theme: "nam.theme" };
+  const KEYS = { session: "nam.session", wrong: "nam.wrong", history: "nam.history", theme: "nam.theme", auth: "nam.auth" };
+  // 처음 들어올 때 보여 주는 환영용 로그인 (공개 사이트라 실제 보안 기능은 아님)
+  const LOGIN = { id: "김민지", pw: "합격" };
   const CIRCLED = ["①", "②", "③", "④", "⑤", "⑥"];
 
   // ===== 문제은행 =====
@@ -79,7 +81,7 @@
 
   // ===== 화면 전환 =====
   function show(view) {
-    ["home", "quiz", "result"].forEach(function (v) {
+    ["login", "home", "quiz", "result"].forEach(function (v) {
       $("view-" + v).classList.toggle("hidden", v !== view);
     });
     window.scrollTo(0, 0);
@@ -154,8 +156,35 @@
     }
   }
 
+  // ===== 로그인 =====
+  let authed = store.get(KEYS.auth, false) === true;
+
+  function showLogin() {
+    stopTimer();
+    $("loginError").classList.add("hidden");
+    show("login");
+    setTimeout(function () { $("loginId").focus(); }, 0);
+  }
+
+  $("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const id = $("loginId").value.trim();
+    const pw = $("loginPw").value.trim();
+    if (id === LOGIN.id && pw === LOGIN.pw) {
+      authed = true;
+      store.set(KEYS.auth, true);
+      $("loginPw").value = "";
+      renderHome();
+    } else {
+      $("loginError").classList.remove("hidden");
+      $("loginPw").value = "";
+      $("loginPw").focus();
+    }
+  });
+
   // ===== 홈 =====
   function renderHome() {
+    if (!authed) return showLogin();
     $("bankCount").textContent = BANK.length;
 
     $("examComposition").innerHTML = SUBJECT_ORDER.map(function (s) {
@@ -537,7 +566,7 @@
   });
 
   document.addEventListener("keydown", function (e) {
-    if ($("view-quiz").classList.contains("hidden") || !session) return;
+    if (!authed || $("view-quiz").classList.contains("hidden") || !session) return;
     if ($("confirmDialog").open) return;
     if (e.target.matches("input, select, textarea")) return;
     if (e.key >= "1" && e.key <= "5") {

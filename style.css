@@ -65,6 +65,7 @@
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+button, select { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 body {
   margin: 0;
   background: var(--bg);
@@ -87,6 +88,7 @@ p { margin: .25rem 0; }
   position: sticky; top: 0; z-index: 10;
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   padding: 10px 16px;
+  background: var(--bg);
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
@@ -194,9 +196,11 @@ select {
 
 /* Quiz */
 .quiz-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+.quiz-head > div { min-width: 0; }
+.quiz-head .btn { flex: none; white-space: nowrap; }
 .eyebrow { font-size: .85rem; color: var(--muted); margin: 0; }
 .progress-text { margin: 0; font-size: 1.05rem; }
-.tag { display: inline-block; font-size: .78rem; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); margin-left: 6px; vertical-align: 2px; }
+.tag { display: inline-block; font-size: .78rem; padding: 1px 8px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); margin-left: 6px; vertical-align: 2px; }
 .progress { height: 6px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
 .progress-bar { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
 
